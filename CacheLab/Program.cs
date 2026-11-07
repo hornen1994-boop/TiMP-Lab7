@@ -7,14 +7,12 @@ using StackExchange.Redis;
 
 namespace CacheLab
 {
-    // 1. Интерфейс кеш-провайдера
     public interface ICacheProvider
     {
         Task<string?> GetAsync(string key);
         Task SetAsync(string key, string value, TimeSpan ttl);
     }
 
-    // 2. Реализация провайдера через Redis
     public class RedisCacheProvider : ICacheProvider
     {
         private readonly IDatabase _db;
@@ -27,13 +25,12 @@ namespace CacheLab
             => await _db.StringSetAsync(key, value, ttl);
     }
 
-    // 3. Дорогой сервис - эмуляция сканера уязвимостей
     public class VulnerabilityScanner
     {
         public async Task<List<string>> ScanServerAsync(string serverId)
         {
             Console.WriteLine($"[Scanner] Выполняется сканирование сервера {serverId}...");
-            await Task.Delay(3000); // Имитация долгого запроса (~3 сек)
+            await Task.Delay(3000); 
 
             var events = new List<VulnerabilityEvent>
             {
@@ -50,17 +47,14 @@ namespace CacheLab
         }
     }
 
-    // 4. Точка входа — реализация паттерна Cache-Aside
     class Program
     {
         static async Task Main(string[] args)
         {
-            // Поддержка аргумента командной строки для автоматизации
             string? choice = args.Length > 0 ? args[0] : null;
 
             Console.WriteLine("=== CVE Cache Monitor | Вариант 9 ===");
 
-            // Подключение к Redis (localhost для локального запуска, redis для docker-compose)
             var redisHost = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
             Console.WriteLine($"Подключение к Redis ({redisHost}:6379)...");
 
@@ -119,7 +113,6 @@ namespace CacheLab
                 Console.WriteLine();
             }
 
-            // Дорогой запрос к источнику данных
             var scanner = new VulnerabilityScanner();
             var vulns   = await scanner.ScanServerAsync(serverId);
             sw.Stop();
@@ -130,7 +123,6 @@ namespace CacheLab
             foreach (var v in vulns)
                 Console.WriteLine($"  - {v}");
 
-            // Сохранение в кеш при режиме 1
             if (choice == "1")
             {
                 Console.WriteLine();
